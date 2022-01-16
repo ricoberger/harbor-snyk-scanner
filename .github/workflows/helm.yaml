@@ -29,6 +29,10 @@ jobs:
           sleep 10s
           helm install --namespace harbor harbor-snyk-scanner deploy/helm/harbor-snyk-scanner
 
+      - name: Configure git
+        run: |
+          git config --global user.email "mail@ricoberger.de" && git config --global user.name "ricoberger"
+
       - name: Package Helm Chart
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
