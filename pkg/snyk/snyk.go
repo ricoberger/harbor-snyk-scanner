@@ -46,7 +46,7 @@ func init() {
 	flag.StringVar(&apiKey, "snyk.api-key", defaultAPIKey, "The API key to access the Snyk API.")
 	flag.StringVar(&baseURL, "snyk.base-url", defaultBaseURL, "The base url of the Snyk API.")
 	flag.StringVar(&integrationID, "snyk.integration-id", defaultIntegrationID, "The id of the Snyk integration.")
-	flag.StringVar(&organisationID, "snyk.organisation-url", defaultOrganisationID, "The id of the Snyk organisation.")
+	flag.StringVar(&organisationID, "snyk.organisation-id", defaultOrganisationID, "The id of the Snyk organisation.")
 }
 
 type Client interface {

@@ -1,0 +1,55 @@
+name: Helm
+
+on:
+  push:
+    paths:
+      - 'deploy/helm/harbor-snyk-scanner/**'
+
+jobs:
+  helm:
+    name: Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Lint
+        run: |
+          helm lint deploy/helm/harbor-snyk-scanner
+
+      - name: Template
+        run: |
+          helm template harbor-snyk-scanner -n harbor deploy/helm/harbor-snyk-scanner
+
+      - name: Install
+        run: |
+          kind create cluster
+          sleep 60s
+          kubectl create namespace harbor
+          sleep 10s
+          helm install --namespace harbor harbor-snyk-scanner deploy/helm/harbor-snyk-scanner
+
+      - name: Package Helm Chart
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          helm package ./deploy/helm/harbor-snyk-scanner
+
+      - name: Clone Helm Repository
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          git clone https://github.com/ricoberger/helm-charts.git
+
+      - name: Update Helm Repository
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          mv harbor-snyk-scanner* ./helm-charts/ && helm repo index helm-charts/ --url https://ricoberger.github.io/helm-charts/
+
+      - name: Commit Changes
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          cd helm-charts/ && git add . && git commit -m "Add new release for Harbor Snyk Scanner"
+
+      - name: Push Changes
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          cd helm-charts/ && git push https://ricoberger:${{ secrets.TOKEN }}@github.com/ricoberger/helm-charts.git
