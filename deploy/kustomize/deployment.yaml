@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-snyk-scanner
+  labels:
+    app: harbor-snyk-scanner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harbor-snyk-scanner
+  template:
+    metadata:
+      labels:
+        app: harbor-snyk-scanner
+    spec:
+      containers:
+        - name: scanner
+          image: "ricoberger/harbor-snyk-scanner:v0.1.0"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --log.level=info
+            - --log.format=json
+          ports:
+            - name: http-api
+              containerPort: 8080
+              protocol: TCP
+            - name: http-metrics
+              containerPort: 8081
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http-api
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http-api
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      terminationGracePeriodSeconds: 90
